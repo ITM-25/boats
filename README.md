@@ -1,1 +1,1 @@
-About a boat in x
+About a boat
