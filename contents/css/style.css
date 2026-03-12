@@ -297,6 +297,68 @@ article .date {
     display: none;
 }
 
+/* Mobile expandable navigation */
+[data-mobile-nav] {
+    display: block;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    z-index: 60;
+}
+
+[data-mobile-nav] details {
+    background: linear-gradient(90deg, #f7f7f7, #f1f1f1);
+    border-radius: 9px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+[data-mobile-nav] summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    user-select: none;
+}
+
+[data-mobile-nav] summary::after {
+    content: "+";
+    font-size: 22px;
+    line-height: 1;
+    font-weight: 400;
+}
+
+[data-mobile-nav] details[open] summary::after {
+    content: "×";
+    font-size: 22px;
+}
+
+[data-mobile-nav] summary::-webkit-details-marker {
+    display: none;
+}
+
+[data-mobile-nav] nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 8px 20px 20px;
+}
+
+[data-mobile-nav] nav a {
+    font-size: 18px;
+    color: #737373;
+}
+
+[data-mobile-nav] nav a.active {
+    color: #000;
+    font-weight: 600;
+}
+
 /* Footer */
 footer {
     margin-top: auto;
@@ -380,6 +442,10 @@ footer {
 }
 
 @media (min-width: 1024px) {
+    [data-mobile-nav] {
+        display: none;
+    }
+
     .nav-links {
         display: flex;
         align-items: center;

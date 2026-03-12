@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ollama launch · Ollama Blog</title>
+        <meta
+            name="description"
+            content="ollama launch is a new command which sets up and runs coding tools like Claude Code, OpenCode, and Codex with local or cloud models. No environment variables or config files needed."
+        />
+        <link
+            rel="icon"
+            href="../img/favicon.png"
+            type="image/png"
+        />
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
+    <body>
+        <!-- Header -->
+        <header></header>
+
+        <!-- Main Content -->
+        <article>
+            <h1>ollama launch</h1>
+            <p class="date">January 23, 2026</p>
+
+            <section class="content">
+                <img
+                    src="img/ollama-launch-1.png"
+                    alt="ollama launch example"
+                />
+
+                <p>
+                    <code>ollama launch</code> is a new command which sets up
+                    and runs your favorite coding tools like Claude Code,
+                    OpenCode, and Codex with local or cloud models. No
+                    environment variables or config files needed.
+                </p>
+
+                <h2 id="get-started">Get started</h2>
+
+                <p>
+                    Download
+                    <a href="https://ollama.com/download">Ollama v0.15+</a>,
+                    then open a terminal and run:
+                </p>
+
+                <pre><code><span class="comment"># ~23 GB VRAM required with 64000 tokens context length</span>
+ollama pull glm-4.7-flash
+
+<span class="comment"># or use a cloud model (with full context length)</span>
+ollama pull glm-4.7:cloud</code></pre>
+
+                <h2 id="one-command-setup">One command setup</h2>
+
+                <p><strong>Claude Code:</strong></p>
+
+                <pre><code>ollama launch claude</code></pre>
+
+                <img
+                    src="img/ollama-launch-2.png"
+                    alt="Claude Code example"
+                />
+
+                <p><strong>OpenCode:</strong></p>
+
+                <pre><code>ollama launch opencode</code></pre>
+
+                <img
+                    src="img/ollama-launch-3.png"
+                    alt="OpenCode example"
+                />
+
+                <p>
+                    This will guide you to select models and launch your chosen
+                    integration. No environment variables or config files
+                    needed.
+                </p>
+
+                <h3 id="supported-integrations">Supported integrations</h3>
+
+                <ul>
+                    <li>Claude Code</li>
+                    <li>OpenCode</li>
+                    <li>Codex</li>
+                    <li>Droid</li>
+                </ul>
+
+                <h2 id="recommended-models-for-coding">
+                    Recommended models for coding
+                </h2>
+
+                <p>
+                    <strong>Note:</strong> Coding tools work best with a full
+                    context length. Update the context length in Ollama's
+                    settings to at least 64000 tokens. See the
+                    <a href="https://docs.ollama.com/context-length"
+                        >context length documentation</a
+                    >
+                    on how to make changes.
+                </p>
+
+                <p><strong>Local models:</strong></p>
+
+                <ul>
+                    <li><code>glm-4.7-flash</code></li>
+                    <li><code>qwen3-coder</code></li>
+                    <li><code>gpt-oss:20b</code></li>
+                </ul>
+
+                <p><strong>Cloud models:</strong></p>
+
+                <ul>
+                    <li><code>glm-4.7:cloud</code></li>
+                    <li><code>minimax-m2.1:cloud</code></li>
+                    <li><code>gpt-oss:120b-cloud</code></li>
+                    <li><code>qwen3-coder:480b-cloud</code></li>
+                </ul>
+
+                <h2 id="extended-coding-sessions">Extended coding sessions</h2>
+
+                <p>
+                    If you have trouble running these models locally, Ollama
+                    also offers a cloud service with hosted models that has full
+                    context length and generous limits even at the free tier.
+                </p>
+
+                <p>
+                    With this update Ollama now offers more usage and an
+                    extended 5-hour coding session window. See
+                    <a href="https://ollama.com/pricing">ollama.com/pricing</a>
+                    for details.
+                </p>
+
+                <h2 id="configure-only">Configure only</h2>
+
+                <p>To configure a tool without launching it immediately:</p>
+
+                <pre><code>ollama launch opencode <span class="parameter">--config</span></code></pre>
+            </section>
+        </article>
+
+        <!-- Left Sidebar -->
+        <aside class="floating-sidebar-left">
+            
+            <nav class="sidebar-nav-left">
+                <a href="../../Antigravity/antigravity.html">Antigravity</a>
+                <a href="../../Amp/amp.html">Amp</a>
+            </nav>
+        </aside>
+    </body>
+</html>
