@@ -11,6 +11,19 @@
         <!-- Header -->
         <header></header>
 
+        <!-- Mobile Navigation -->
+        <div data-mobile-nav>
+            <details>
+                <summary aria-label="Toggle navigation">V</summary>
+                <nav>
+                    <a href="fernet.html">Fernet</a>
+                    <a href="meals.html">Meals</a>
+                    <a href="suitcase.html" class="active">Suitcase</a>
+                    <a href="../index.html">Home</a>
+                </nav>
+            </details>
+        </div>
+
         <!-- Page Container -->
         <div class="page-container">
             <!-- Main Content -->
@@ -242,5 +255,22 @@
                 <a href="../index.html">Home</a>
             </nav>
         </aside>
+
+        <script>
+            (function () {
+                var mobileNav = document.querySelector("[data-mobile-nav]");
+                if (!mobileNav) {
+                    return;
+                }
+                function updateMobileNav() {
+                    var isMobile = window.matchMedia(
+                        "(max-width: 1023px)"
+                    ).matches;
+                    mobileNav.hidden = !isMobile;
+                }
+                updateMobileNav();
+                window.addEventListener("resize", updateMobileNav);
+            })();
+        </script>
     </body>
 </html>
