@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+
+<!-- Perplexity Computer Attribution — SEO Meta Tags -->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="6 months deep with Claude Code: architecture, governance, and engineering practices — 400k tokens/month of hard-won lessons on Context, Action, Control, Isolation, and Verification surfaces.">
+<title>Claude Code You Didn't Know About: Architecture, Governance & Engineering Practice</title>
+
+<!-- Fonts -->
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root {
+  --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
+  --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+  --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
+  --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
+  --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
+  --text-2xl:  clamp(2rem,     1.2rem  + 2.5vw,  3.5rem);
+  --text-3xl:  clamp(2.5rem,   1rem    + 4vw,    5rem);
+
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  --content-narrow: 680px;
+  --content-default: 820px;
+  --content-wide: 1100px;
+
+  --font-display: 'Cabinet Grotesk', 'Helvetica Neue', sans-serif;
+  --font-body: 'Satoshi', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* LIGHT MODE */
+:root, [data-theme="light"] {
+  --color-bg:             #f5f4f0;
+  --color-surface:        #f8f7f4;
+  --color-surface-2:      #faf9f7;
+  --color-surface-offset: #edeae5;
+  --color-surface-offset-2: #e6e3de;
+  --color-surface-dynamic: #dedad4;
+  --color-divider:        #d8d5cf;
+  --color-border:         #ccc9c2;
+  --color-text:           #1a1914;
+  --color-text-muted:     #6b6a65;
+  --color-text-faint:     #aaa9a4;
+  --color-text-inverse:   #f5f4f0;
+  --color-primary:        #01696f;
+  --color-primary-hover:  #0c4e54;
+  --color-primary-light:  #cedcd8;
+  --color-code-bg:        #1a1a17;
+  --color-code-text:      #e2e0da;
+  --color-tag-bg:         #e2f0ef;
+  --color-tag-text:       #01696f;
+  --color-callout-bg:     #f0f6f5;
+  --color-callout-border: #b2d0cc;
+  --shadow-sm: 0 1px 2px rgba(26,25,20,0.06);
+  --shadow-md: 0 4px 12px rgba(26,25,20,0.08);
+  --shadow-lg: 0 12px 32px rgba(26,25,20,0.12);
+}
+
+/* DARK MODE */
+[data-theme="dark"] {
+  --color-bg:             #131210;
+  --color-surface:        #181714;
+  --color-surface-2:      #1d1c19;
+  --color-surface-offset: #1a1917;
+  --color-surface-offset-2: #201f1c;
+  --color-surface-dynamic: #2a2926;
+  --color-divider:        #222019;
+  --color-border:         #353330;
+  --color-text:           #cac8c4;
+  --color-text-muted:     #727068;
+  --color-text-faint:     #524f4b;
+  --color-text-inverse:   #1a1914;
+  --color-primary:        #4f98a3;
+  --color-primary-hover:  #227f8b;
+  --color-primary-light:  #2a3d3c;
+  --color-code-bg:        #0d0c0a;
+  --color-code-text:      #d4d2cc;
+  --color-tag-bg:         #1e3434;
+  --color-tag-text:       #5ab0bb;
+  --color-callout-bg:     #1a2424;
+  --color-callout-border: #2a4040;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-bg:             #131210;
+    --color-surface:        #181714;
+    --color-surface-2:      #1d1c19;
+    --color-surface-offset: #1a1917;
+    --color-surface-offset-2: #201f1c;
+    --color-surface-dynamic: #2a2926;
+    --color-divider:        #222019;
+    --color-border:         #353330;
+    --color-text:           #cac8c4;
+    --color-text-muted:     #727068;
+    --color-text-faint:     #524f4b;
+    --color-text-inverse:   #1a1914;
+    --color-primary:        #4f98a3;
+    --color-primary-hover:  #227f8b;
+    --color-primary-light:  #2a3d3c;
+    --color-code-bg:        #0d0c0a;
+    --color-code-text:      #d4d2cc;
+    --color-tag-bg:         #1e3434;
+    --color-tag-text:       #5ab0bb;
+    --color-callout-bg:     #1a2424;
+    --color-callout-border: #2a4040;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.4);
+  }
+}
+
+/* ===== BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--space-16);
+}
+
+body {
+  min-height: 100dvh;
+  line-height: 1.7;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+img, picture, video, canvas, svg { display: block; max-width: 100%; height: auto; }
+ul[role="list"], ol[role="list"] { list-style: none; }
+input, button, textarea, select { font: inherit; color: inherit; }
+h1, h2, h3, h4, h5, h6 { text-wrap: balance; line-height: 1.2; font-family: var(--font-display); }
+p, li { text-wrap: pretty; }
+
+::selection { background: color-mix(in oklab, var(--color-primary) 25%, transparent); color: var(--color-text); }
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; border-radius: var(--radius-sm); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+button { cursor: pointer; background: none; border: none; }
+a, button { transition: color var(--transition-interactive), background var(--transition-interactive), opacity var(--transition-interactive); }
+
+/* ===== LAYOUT ===== */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: color-mix(in oklab, var(--color-bg) 90%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-divider);
+  padding: var(--space-3) var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.site-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.site-logo svg { color: var(--color-primary); flex-shrink: 0; }
+
+.logo-wordmark {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.author-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-surface-offset);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border: 1px solid var(--color-border);
+  transition: background var(--transition-interactive);
+}
+.author-chip:hover { background: var(--color-surface-dynamic); color: var(--color-text); }
+
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+.theme-toggle:hover { color: var(--color-text); background: var(--color-surface-offset); }
+
+/* ===== HERO ===== */
+.hero {
+  padding: clamp(var(--space-12), 8vw, var(--space-24)) var(--space-6) var(--space-8);
+  max-width: var(--content-default);
+  margin: 0 auto;
+}
+
+.hero-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-tag-bg);
+  color: var(--color-tag-text);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+.date {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  font-family: var(--font-mono);
+}
+
+.hero-title {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--color-text);
+  margin-bottom: var(--space-6);
+  line-height: 1.1;
+}
+
+.hero-title .accent { color: var(--color-primary); }
+
+.hero-subtitle {
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+  max-width: 58ch;
+  line-height: 1.6;
+  margin-bottom: var(--space-8);
+}
+
+.hero-stats {
+  display: flex;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+  padding: var(--space-5) var(--space-6);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--space-8);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.stat-value {
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-primary);
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+.stat-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-mono);
+}
+
+.hero-image {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
+}
+
+/* ===== ARTICLE BODY ===== */
+.article-wrap {
+  max-width: var(--content-default);
+  margin: 0 auto;
+  padding: 0 var(--space-6) var(--space-24);
+}
+
+/* TOC */
+.toc {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-16);
+}
+
+.toc-title {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  margin-bottom: var(--space-4);
+}
+
+.toc-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1) var(--space-8);
+}
+
+@media (max-width: 600px) {
+  .toc-list { grid-template-columns: 1fr; }
+}
+
+.toc-list a {
+  text-decoration: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  transition: color var(--transition-interactive);
+}
+.toc-list a:hover { color: var(--color-primary); }
+.toc-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  min-width: 1.5em;
+}
+
+/* SECTIONS */
+.section {
+  margin-bottom: clamp(var(--space-12), 6vw, var(--space-20));
+  scroll-margin-top: var(--space-16);
+}
+
+.section-number {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-2);
+  display: block;
+}
+
+.section-title {
+  font-size: var(--text-xl);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 2px solid var(--color-primary);
+  display: inline-block;
+}
+
+.section-subtitle {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: var(--space-8) 0 var(--space-3);
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+p {
+  margin-bottom: var(--space-4);
+  max-width: 70ch;
+  color: var(--color-text);
+}
+
+/* ARTICLE IMAGES */
+.article-image {
+  margin: var(--space-8) 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+}
+
+.article-image img {
+  width: 100%;
+  height: auto;
+}
+
+.image-caption {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  border-top: 1px solid var(--color-divider);
+}
+
+/* CALLOUT */
+.callout {
+  background: var(--color-callout-bg);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-4) var(--space-6);
+  margin: var(--space-6) 0;
+}
+
+.callout p { margin: 0; color: var(--color-text); }
+.callout strong { color: var(--color-primary); }
+
+/* CODE BLOCKS */
+pre {
+  background: var(--color-code-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  overflow-x: auto;
+  margin: var(--space-6) 0;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+pre code {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-code-text);
+  line-height: 1.65;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--color-surface-offset);
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
+}
+
+pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+
+/* LISTS */
+ul, ol {
+  padding-left: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+li {
+  margin-bottom: var(--space-2);
+  max-width: 68ch;
+}
+
+/* FIVE SURFACES GRID */
+.surfaces-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-8) 0;
+}
+
+.surface-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5) var(--space-6);
+  transition: transform var(--transition-interactive), box-shadow var(--transition-interactive);
+}
+
+.surface-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.surface-icon {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-3);
+}
+
+.surface-name {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+}
+
+.surface-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  max-width: none;
+  margin: 0;
+}
+
+/* SKILL TYPES */
+.skill-types {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin: var(--space-6) 0;
+}
+
+@media (max-width: 600px) {
+  .skill-types { grid-template-columns: 1fr; }
+}
+
+.skill-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+}
+
+.skill-type-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-2);
+}
+
+.skill-card-title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-3);
+  font-family: var(--font-display);
+}
+
+.skill-card p {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+  max-width: none;
+}
+
+/* HOOKS TABLE */
+.hooks-table-wrap {
+  overflow-x: auto;
+  margin: var(--space-6) 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+thead th {
+  background: var(--color-surface-offset);
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+tbody td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-divider);
+  vertical-align: top;
+}
+
+tbody tr:hover td {
+  background: var(--color-surface);
+}
+
+/* COMMANDS GRID */
+.commands-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-6) 0;
+}
+
+.command-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+}
+
+.command-name {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+}
+
+.command-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.55;
+  margin: 0;
+  max-width: none;
+}
+
+/* VERIFIER LEVELS */
+.verifier-levels {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-6) 0;
+}
+
+.verifier-level {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-border);
+}
+
+.verifier-level.level-1 { border-left-color: #6daa45; }
+.verifier-level.level-2 { border-left-color: var(--color-primary); }
+.verifier-level.level-3 { border-left-color: #fdab43; }
+
+.level-badge {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-offset);
+  white-space: nowrap;
+  color: var(--color-text-muted);
+}
+
+.level-content .level-name {
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.level-content p {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+  max-width: none;
+}
+
+/* PROMPT CACHE ORDER */
+.prompt-order {
+  counter-reset: prompt-step;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-6) 0;
+}
+
+.prompt-step {
+  counter-increment: prompt-step;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.prompt-step::before {
+  content: counter(prompt-step);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--color-primary);
+  background: var(--color-tag-bg);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.prompt-step-name {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  flex: 1;
+}
+
+.prompt-step-note {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  background: var(--color-surface-offset);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+/* DISABLE STRATEGY TABLE */
+.disable-strategy {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin: var(--space-6) 0;
+}
+
+@media (max-width: 600px) {
+  .disable-strategy { grid-template-columns: 1fr; }
+}
+
+.ds-cell {
+  background: var(--color-surface);
+  padding: var(--space-4);
+}
+
+.ds-cell.header {
+  background: var(--color-surface-offset);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.ds-freq {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.ds-action {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* CLAUDE.MD WHAT TO PUT */
+.claude-md-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin: var(--space-6) 0;
+}
+
+@media (max-width: 600px) {
+  .claude-md-grid { grid-template-columns: 1fr; }
+}
+
+.claude-md-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+}
+
+.claude-md-card.do { border-top: 2px solid #6daa45; }
+.claude-md-card.dont { border-top: 2px solid #bb653b; }
+
+.claude-md-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-3);
+}
+
+.claude-md-card.do .claude-md-label { color: #6daa45; }
+.claude-md-card.dont .claude-md-label { color: #bb653b; }
+
+.claude-md-card ul {
+  padding-left: var(--space-5);
+  margin: 0;
+}
+
+.claude-md-card li {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+  max-width: none;
+}
+
+/* KAKU BLOCK */
+.kaku-block {
+  background: linear-gradient(135deg, var(--color-surface-2) 0%, var(--color-surface-offset) 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  margin: var(--space-8) 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.kaku-block::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), #4f98a3, #6daa45);
+}
+
+.kaku-title {
+  font-size: var(--text-lg);
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: var(--space-3);
+  font-family: var(--font-display);
+}
+
+/* CLOSING QUOTE */
+.closing-quote {
+  border-left: 3px solid var(--color-primary);
+  padding: var(--space-4) var(--space-6);
+  margin: var(--space-8) 0;
+  font-size: var(--text-lg);
+  font-style: italic;
+  color: var(--color-text-muted);
+  background: var(--color-callout-bg);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+}
+
+/* DIVIDER */
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--color-divider);
+  margin: var(--space-12) 0;
+}
+
+/* FOOTER */
+.site-footer {
+  border-top: 1px solid var(--color-divider);
+  padding: var(--space-8) var(--space-6);
+  max-width: var(--content-default);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.footer-note {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  font-family: var(--font-mono);
+}
+
+.footer-credit a {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  text-decoration: none;
+}
+.footer-credit a:hover { color: var(--color-primary); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .hero { padding: var(--space-8) var(--space-4); }
+  .article-wrap { padding: 0 var(--space-4) var(--space-16); }
+  .site-header { padding: var(--space-3) var(--space-4); }
+  .hero-stats { gap: var(--space-4); }
+  .surfaces-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <a href="#" class="site-logo" aria-label="Claude Code Article">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <rect x="2" y="2" width="24" height="24" rx="6" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M8 14l4-4 4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="14" cy="19" r="1.5" fill="currentColor"/>
+    </svg>
+    <span class="logo-wordmark">Claude Code</span>
+  </a>
+  <div class="header-controls">
+    <a href="https://x.com/HiTw93" target="_blank" rel="noopener noreferrer" class="author-chip">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      @HiTw93
+    </a>
+    <button class="theme-toggle" data-theme-toggle aria-label="Switch theme">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-meta">
+    <span class="tag">Engineering</span>
+    <span class="tag">Claude Code</span>
+    <span class="date">March 12, 2026</span>
+  </div>
+
+  <h1 class="hero-title">
+    Claude Code You Didn't Know About:<br>
+    <span class="accent">Architecture, Governance</span> &amp; Engineering Practice
+  </h1>
+
+  <p class="hero-subtitle">
+    Six months deep, two accounts, 400k tokens/month — lessons learned moving from treating Claude Code as a chatbot to designing it as a proper engineering system.
+  </p>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-value">400k</span>
+      <span class="stat-label">Tokens / Month</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">6mo</span>
+      <span class="stat-label">Deep Usage</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">200K</span>
+      <span class="stat-label">Context Window</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">5</span>
+      <span class="stat-label">Key Surfaces</span>
+    </div>
+  </div>
+
+  <div class="hero-image">
+    <img src="images/claude-code-hero.png" alt="Claude Code v2 terminal interface showing model status and token context usage" width="1440" height="810">
+  </div>
+</section>
+
+<!-- ARTICLE BODY -->
+<main class="article-wrap">
+
+  <!-- TOC -->
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-title">Contents</div>
+    <ol class="toc-list">
+      <li><a href="#tl-dr"><span class="toc-num">0.</span> TL;DR</a></li>
+      <li><a href="#five-surfaces"><span class="toc-num">1.</span> The Five Key Surfaces</a></li>
+      <li><a href="#context-economics"><span class="toc-num">2.</span> Context Economics</a></li>
+      <li><a href="#plan-mode"><span class="toc-num">3.</span> Plan Mode</a></li>
+      <li><a href="#skills-design"><span class="toc-num">4.</span> Skills Design</a></li>
+      <li><a href="#tool-design"><span class="toc-num">5.</span> Tool Design</a></li>
+      <li><a href="#hooks"><span class="toc-num">6.</span> Hooks</a></li>
+      <li><a href="#subagents"><span class="toc-num">7.</span> Subagents</a></li>
+      <li><a href="#prompt-caching"><span class="toc-num">8.</span> Prompt Caching</a></li>
+      <li><a href="#verification"><span class="toc-num">9.</span> Verification Loop</a></li>
+      <li><a href="#commands"><span class="toc-num">10.</span> Useful Commands</a></li>
+      <li><a href="#claude-md"><span class="toc-num">11.</span> CLAUDE.md Design</a></li>
+      <li><a href="#experience"><span class="toc-num">12.</span> Recent Experience (Kaku)</a></li>
+      <li><a href="#three-stages"><span class="toc-num">13.</span> Three Stages</a></li>
+    </ol>
+  </nav>
+
+  <hr class="section-divider">
+
+  <!-- 0. TL;DR -->
+  <section id="tl-dr" class="section">
+    <span class="section-number">Section 0</span>
+    <h2 class="section-title">TL;DR</h2>
+
+    <p>I started using Claude Code the way everyone does — as a chatbot. The context got messier and messier, I added more tools but got worse results, my rules grew longer and less effective. After digging deep into how the system actually works, I realized this wasn't a prompt problem. <strong>It's a system design problem.</strong></p>
+
+    <p>Most of the times I got stuck had nothing to do with the model being insufficiently capable. It was almost always that I gave it the wrong context, or it produced something I had no way to validate, or there was no way to roll back. These are engineering problems.</p>
+
+    <div class="callout">
+      <p><strong>The core insight:</strong> Claude Code's 200K context is not fully available. Fixed overhead — system prompts, skill descriptors, MCP server tool definitions, LSP state — consumes roughly 15–20K tokens. Connect 5 MCP servers with 20–30 tools each at ~200 tokens per definition and you've spent 25,000 tokens (12.5%) before writing a single line of code.</p>
+    </div>
+  </section>
+
+  <!-- 1. FIVE SURFACES -->
+  <section id="five-surfaces" class="section">
+    <span class="section-number">Section 1</span>
+    <h2 class="section-title">The Five Key Surfaces</h2>
+
+    <p>The real framework for thinking about Claude Code is not "better prompts" — it's five distinct design surfaces, each with its own concerns:</p>
+
+    <div class="surfaces-grid">
+      <div class="surface-card">
+        <div class="surface-icon">📄</div>
+        <div class="surface-name">Context Surface</div>
+        <p class="surface-desc">What information is always-on vs. loaded on demand — <code>CLAUDE.md</code>, rules, memory, skills. What Claude always sees vs. what gets pulled in when needed.</p>
+      </div>
+      <div class="surface-card">
+        <div class="surface-icon">⚡</div>
+        <div class="surface-name">Action Surface</div>
+        <p class="surface-desc">What actions Claude currently has available — built-in tools, MCP servers, plugins. The total action space Claude can reason about in this session.</p>
+      </div>
+      <div class="surface-card">
+        <div class="surface-icon">🔒</div>
+        <div class="surface-name">Control Surface</div>
+        <p class="surface-desc">Which actions require confirmation, can be blocked, or must be audited — permissions, sandbox, hooks. This is your circuit-breaker layer.</p>
+      </div>
+      <div class="surface-card">
+        <div class="surface-icon">🔬</div>
+        <div class="surface-name">Isolation Surface</div>
+        <p class="surface-desc">Which tasks need to run in a smaller, isolated context — subagents, worktrees, forked sessions. The key value is isolation, not just parallelism.</p>
+      </div>
+      <div class="surface-card">
+        <div class="surface-icon">✅</div>
+        <div class="surface-name">Verification Surface</div>
+        <p class="surface-desc">How you determine a task is complete and the result is trustworthy — tests, lint, screenshots, logs, CI. Without this there's no engineering, only vibe-checking.</p>
+      </div>
+    </div>
+
+    <div class="article-image">
+      <img src="images/architecture-diagram.png" alt="Architecture diagram showing the three main layers: Context, Action, and Verification, with a Control Surface column on the right containing Permissions, Hooks, and Sandbox" width="1440" height="810">
+      <div class="image-caption">The three-layer architecture with a cross-cutting control surface</div>
+    </div>
+  </section>
+
+  <!-- 2. CONTEXT ECONOMICS -->
+  <section id="context-economics" class="section">
+    <span class="section-number">Section 2</span>
+    <h2 class="section-title">Context Economics</h2>
+
+    <p>The 200K context window isn't a blank canvas. You're always working with overhead you can't see.</p>
+
+    <div class="article-image">
+      <img src="images/context-economics.png" alt="Horizontal bar chart showing 200K token budget distribution: System Prompt + Tools 7.5%, MCP Servers 5x 12.5%, Chat History 55%, Working Context 24.9%, Current Input 0.1%" width="1440" height="810">
+      <div class="image-caption">Context budget breakdown — a typical session with 5 MCP servers starts with 20K already consumed</div>
+    </div>
+
+    <h3 class="section-subtitle">Compaction Strategy</h3>
+    <p>For task switching, prefer <code>/clear</code>. For entering a new phase within the same task, use <code>/compact</code>.</p>
+
+    <div class="callout">
+      <p><strong>The compaction trap:</strong> Default compaction uses a "re-readable" heuristic — early tool output and file content gets dropped first. This sounds reasonable until you realize that architectural decisions and constraints live in that early content. Write your <code>Compact Instructions</code> in <code>CLAUDE.md</code> to explicitly control what survives compression.</p>
+    </div>
+
+    <pre><code># In your CLAUDE.md — Compact Instructions
+When compacting, ALWAYS preserve:
+- The current task goal and acceptance criteria
+- Architecture decisions made this session
+- Any constraints or NEVER-DO items surfaced in this task
+- The current file under active modification</code></pre>
+  </section>
+
+  <!-- 3. PLAN MODE -->
+  <section id="plan-mode" class="section">
+    <span class="section-number">Section 3</span>
+    <h2 class="section-title">Plan Mode</h2>
+
+    <p>Execution costs happen <em>after</em> the plan is confirmed. For complex refactors, migrations, and cross-module changes, this is dramatically more valuable than "let's see the code first." Hit <kbd>Shift+Tab</kbd> twice to enter Plan Mode.</p>
+
+    <h3 class="section-subtitle">Advanced: AI Reviews AI</h3>
+    <p>The most powerful pattern: open one Claude to write the plan, then open a second instance (or use Codex) to review that plan in the role of "senior engineer." Let the AI audit the AI. The quality difference is significant — the reviewer finds edge cases the planner normalized over.</p>
+
+    <div class="callout">
+      <p><strong>Keyboard shortcut:</strong> <code>Shift+Tab</code> × 2 → Plan Mode. Claude writes a plan, waits for explicit approval before touching any files.</p>
+    </div>
+  </section>
+
+  <!-- 4. SKILLS DESIGN -->
+  <section id="skills-design" class="section">
+    <span class="section-number">Section 4</span>
+    <h2 class="section-title">Skills Design: Not a Template Library</h2>
+
+    <p>The official description of Skills is "on-demand knowledge and workflows." The descriptor lives in context always; the full content loads only when invoked. Think of Skills not as stored prompts but as <em>workflows that activate when relevant</em>.</p>
+
+    <div class="skill-types">
+      <div class="skill-card">
+        <div class="skill-type-label">Type 1</div>
+        <div class="skill-card-title">Checklist Type (Quality Gate)</div>
+        <p>Run before release to ensure nothing is missed. Examples: pre-deploy verification, security audit checklist, API contract check before merging.</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-type-label">Type 2</div>
+        <div class="skill-card-title">Workflow Type (Standardized Operation)</div>
+        <p>High-risk, standardized processes like config migration — explicitly invoked with built-in rollback steps. The Skill encodes the safe procedure, not just the goal.</p>
+      </div>
+    </div>
+
+    <h3 class="section-subtitle">disable-auto-invoke Strategy</h3>
+
+    <div class="disable-strategy">
+      <div class="ds-cell header">Frequency</div>
+      <div class="ds-cell header">Recommendation</div>
+      <div class="ds-cell header">Rationale</div>
+
+      <div class="ds-cell">
+        <div class="ds-freq">High (&gt;1×/session)</div>
+        <div class="ds-action">Keep auto-invoke, optimize descriptor</div>
+      </div>
+      <div class="ds-cell">
+        <div class="ds-freq">Low (&lt;1×/session)</div>
+        <div class="ds-action">Use disable-auto-invoke, manual trigger</div>
+      </div>
+      <div class="ds-cell">
+        <div class="ds-freq">Very low (&lt;1×/month)</div>
+        <div class="ds-action">Remove Skill, move to AGENTS.md docs</div>
+      </div>
+      <div class="ds-cell"></div>
+      <div class="ds-cell"></div>
+      <div class="ds-cell"></div>
+    </div>
+
+    <h3 class="section-subtitle">Anti-patterns</h3>
+    <ul>
+      <li>Descriptors that are too short (Claude can't tell when to invoke it)</li>
+      <li>Skill body that is too long (wastes context on every load)</li>
+      <li>One Skill that tries to cover review / deploy / debug / docs / incident — five jobs for one Skill</li>
+      <li>A Skill with side effects that allows auto-invoke by the model</li>
+    </ul>
+  </section>
+
+  <!-- 5. TOOL DESIGN -->
+  <section id="tool-design" class="section">
+    <span class="section-number">Section 5</span>
+    <h2 class="section-title">Tool Design: How to Make Claude Choose Correctly</h2>
+
+    <p>Tools for Claude are fundamentally different from APIs written for humans. Evolution through three generations:</p>
+
+    <div class="article-image">
+      <img src="images/ask-user-question-spectrum.png" alt="Spectrum diagram: Too Loose (modified markdown output) → Just Right (AskUserQuestion Tool) → Too Rigid (ExitPlanTool parameter)" width="1440" height="810">
+      <div class="image-caption">Finding the sweet spot between loose output parsing and over-structured tool schemas</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>Approach</th>
+          <th>Problem</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>v1</code></td>
+          <td>Add a <code>question</code> parameter to an existing tool</td>
+          <td>Claude mostly ignores it or treats it as optional metadata</td>
+        </tr>
+        <tr>
+          <td><code>v2</code></td>
+          <td>Require Claude to output a specific markdown format; parse it externally</td>
+          <td>External parser is brittle; any format variation breaks it</td>
+        </tr>
+        <tr>
+          <td><code>v3</code></td>
+          <td>Dedicate an <code>AskUserQuestion</code> tool — Claude must explicitly call it to ask anything</td>
+          <td>None. Significantly better than both prior versions.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <p><strong>The principle:</strong> If you want Claude to stop and ask, give it a dedicated tool whose only job is stopping and asking. Don't embed intent in parameters of unrelated tools.</p>
+    </div>
+  </section>
+
+  <!-- 6. HOOKS -->
+  <section id="hooks" class="section">
+    <span class="section-number">Section 6</span>
+    <h2 class="section-title">Hooks: Re-Claiming Determinism</h2>
+
+    <p>Hooks are easy to think about as "scripts that run automatically." But the more useful mental model is: <em>Hooks are the mechanism to move certain things out of Claude's discretion and back into deterministic control.</em></p>
+
+    <div class="article-image">
+      <img src="images/hooks-lifecycle.png" alt="Claude Code Hooks lifecycle flowchart showing PreToolUse, Tool Executes, PostToolUse, PostToolOnFailure, Notification, and UserPromptSubmit hook points with custom logic injection branches" width="960" height="1280">
+      <div class="image-caption">All five hook injection points in Claude Code's tool execution lifecycle</div>
+    </div>
+
+    <h3 class="section-subtitle">Supported Hook Points</h3>
+    <div class="hooks-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Hook Point</th>
+            <th>When It Fires</th>
+            <th>Primary Use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>PreToolUse</code></td>
+            <td>Before tool execution</td>
+            <td>Block writes to protected files; inject dynamic context at session start</td>
+          </tr>
+          <tr>
+            <td><code>PostToolUse</code></td>
+            <td>After successful execution</td>
+            <td>Auto-format / lint / lightweight validation after every Edit</td>
+          </tr>
+          <tr>
+            <td><code>PostToolOnFailure</code></td>
+            <td>After a tool execution fails</td>
+            <td>Log failure details; trigger rollback procedures</td>
+          </tr>
+          <tr>
+            <td><code>Notification</code></td>
+            <td>When notifications are sent</td>
+            <td>Push to external channels (Slack, system notifications)</td>
+          </tr>
+          <tr>
+            <td><code>UserPromptSubmit</code></td>
+            <td>When user submits a prompt</td>
+            <td>Sanitize input; inject user-specific context</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="section-subtitle">Hooks vs. Skills — The Division of Labor</h3>
+    <p><strong>Skills</strong> tell Claude in what order to run tests, how to read failures, and how to fix them. <strong>Hooks</strong> enforce hard constraints on critical paths — blocking when necessary, completely outside Claude's discretion.</p>
+
+    <h3 class="section-subtitle">What Hooks Are Good For vs. Not</h3>
+    <div class="claude-md-grid">
+      <div class="claude-md-card do">
+        <div class="claude-md-label">✓ Good fit for Hooks</div>
+        <ul>
+          <li>Blocking writes to protected files</li>
+          <li>Auto-formatting / linting after every edit</li>
+          <li>Injecting dynamic context after SessionStart</li>
+          <li>Sending notifications after task completion</li>
+        </ul>
+      </div>
+      <div class="claude-md-card dont">
+        <div class="claude-md-label">✗ Bad fit for Hooks</div>
+        <ul>
+          <li>Complex semantic judgment needing large context</li>
+          <li>Long-running business logic processes</li>
+          <li>Anything that requires Claude's own reasoning</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. SUBAGENTS -->
+  <section id="subagents" class="section">
+    <span class="section-number">Section 7</span>
+    <h2 class="section-title">Subagents: Send a Separate Claude to Do One Specific Thing</h2>
+
+    <p>A Subagent is an independent Claude instance spun out from the main conversation. It has its own context window, only the tools you specify, and reports back results when done. <strong>The core value is isolation, not parallelism.</strong></p>
+
+    <p>Claude Code ships three built-in subagent types:</p>
+    <ul>
+      <li><strong>Explore</strong> — read-only repository scanning, runs Haiku to save cost</li>
+      <li><strong>Plan</strong> — structured planning with clear articulation of reasoning</li>
+      <li><strong>General-purpose</strong> — fully configured, full-capability agent</li>
+    </ul>
+
+    <h3 class="section-subtitle">Configuration Best Practices</h3>
+    <p>Always explicitly constrain your subagents. Don't leave them with the full tool surface of the parent session:</p>
+
+    <pre><code># Subagent configuration
+tools: ["read_file", "search_code"]
+disallowedTools: ["write_file", "run_command", "git_push"]
+model: "claude-haiku-4-5"  # Cost-saving for exploration tasks
+maxTurns: 10
+isolation: worktree  # Fully isolated git worktree</code></pre>
+
+    <div class="callout">
+      <p><strong>Key insight:</strong> Use subagents not just when you want parallelism, but whenever a task benefits from a clean, isolated context window with no accumulated noise from the main session.</p>
+    </div>
+  </section>
+
+  <!-- 8. PROMPT CACHING -->
+  <section id="prompt-caching" class="section">
+    <span class="section-number">Section 8</span>
+    <h2 class="section-title">Prompt Caching: Prefix Matching</h2>
+
+    <p>Prompt caching works by prefix matching. Claude Code assembles prompts in a fixed order, and anything that changes the early part of that order invalidates the cache for everything that follows.</p>
+
+    <div class="prompt-order">
+      <div class="prompt-step">
+        <span class="prompt-step-name">System Prompt</span>
+        <span class="prompt-step-note">static · locked</span>
+      </div>
+      <div class="prompt-step">
+        <span class="prompt-step-name">Tool Definitions</span>
+        <span class="prompt-step-note">static · locked</span>
+      </div>
+      <div class="prompt-step">
+        <span class="prompt-step-name">Chat History</span>
+        <span class="prompt-step-note">dynamic · grows each turn</span>
+      </div>
+      <div class="prompt-step">
+        <span class="prompt-step-name">Current User Input</span>
+        <span class="prompt-step-note">always last</span>
+      </div>
+    </div>
+
+    <h3 class="section-subtitle">Common Cache-Busting Traps</h3>
+    <ul>
+      <li>Putting dynamic content (timestamps, user IDs) in the static system prompt</li>
+      <li>Non-deterministically shuffling tool definition order between sessions</li>
+      <li>Adding or removing tools mid-session</li>
+    </ul>
+
+    <div class="callout">
+      <p><strong>Rule:</strong> Never switch models mid-session. Prompt caches are model-specific. Changing the model is the same as starting from scratch.</p>
+    </div>
+  </section>
+
+  <!-- 9. VERIFICATION -->
+  <section id="verification" class="section">
+    <span class="section-number">Section 9</span>
+    <h2 class="section-title">Verification Loop: No Verifier, No Engineering</h2>
+
+    <p>Without a verifier, you don't have an engineering agent — you have an autocomplete tool with side effects. Verification has layers, and you want coverage at multiple levels:</p>
+
+    <div class="verifier-levels">
+      <div class="verifier-level level-1">
+        <span class="level-badge">Level 1</span>
+        <div class="level-content">
+          <div class="level-name">Baseline</div>
+          <p>Command exit codes, lint, typecheck, unit tests — zero-cost signal, no excuses for skipping</p>
+        </div>
+      </div>
+      <div class="verifier-level level-2">
+        <span class="level-badge">Level 2</span>
+        <div class="level-content">
+          <div class="level-name">Integration</div>
+          <p>Integration tests, screenshot comparison, contract tests, smoke tests — validates real behavior, not just type signatures</p>
+        </div>
+      </div>
+      <div class="verifier-level level-3">
+        <span class="level-badge">Level 3</span>
+        <div class="level-content">
+          <div class="level-name">Production</div>
+          <p>Production log validation, monitoring metrics, manual review checklists — the real world is the ultimate verifier</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="article-image">
+      <img src="images/session-continuity.png" alt="Diagram showing session continuity: linear session flow with /compact, and a forking diagram showing --continue and --fork branching from a session checkpoint" width="1440" height="810">
+      <div class="image-caption">Session continuity — linear flow vs. forked sessions for parallel exploration</div>
+    </div>
+
+    <h3 class="section-subtitle">Session Continuity &amp; Parallelism</h3>
+    <div class="hooks-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>Behavior</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>claude --continue</code></td>
+            <td>Resume the current directory's last session</td>
+          </tr>
+          <tr>
+            <td><code>claude --resume</code></td>
+            <td>Open a picker to select from session history</td>
+          </tr>
+          <tr>
+            <td><code>claude --continue --fork</code></td>
+            <td>Branch from an existing session checkpoint</td>
+          </tr>
+          <tr>
+            <td><code>claude --worktree</code></td>
+            <td>Run in a fully isolated git worktree</td>
+          </tr>
+          <tr>
+            <td><code>claude -p "prompt"</code></td>
+            <td>Non-interactive (headless) mode</td>
+          </tr>
+          <tr>
+            <td><code>claude -p --output-format json</code></td>
+            <td>Structured JSON output for piping</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 10. COMMANDS -->
+  <section id="commands" class="section">
+    <span class="section-number">Section 10</span>
+    <h2 class="section-title">Useful Commands You Didn't Know About</h2>
+
+    <div class="commands-grid">
+      <div class="command-card">
+        <div class="command-name">/simplify</div>
+        <p class="command-desc">Three-dimensional review of just-modified code: readability, correctness, and redundancy. Run it after every significant change.</p>
+      </div>
+      <div class="command-card">
+        <div class="command-name">/rewind</div>
+        <p class="command-desc">Not "undo" — this returns to a session checkpoint and re-summarizes from there. Useful when you need to revisit a branch of decisions.</p>
+      </div>
+      <div class="command-card">
+        <div class="command-name">/btw</div>
+        <p class="command-desc">Ask a quick question without interrupting the main task flow. The question is noted; the main task resumes immediately.</p>
+      </div>
+      <div class="command-card">
+        <div class="command-name">stream-json</div>
+        <p class="command-desc"><code>claude -p --output-format stream-json</code> — real-time JSON event stream. Pipe it into your own tooling for custom observability.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. CLAUDE.MD -->
+  <section id="claude-md" class="section">
+    <span class="section-number">Section 11</span>
+    <h2 class="section-title">CLAUDE.md Design</h2>
+
+    <div class="article-image">
+      <img src="images/project-structure.png" alt="File tree showing CLAUDE.md at root, .claude/ directory with rules/ and skills/ subdirectories containing various configuration files" width="960" height="1280">
+      <div class="image-caption">Clean project structure: global constraints, path constraints, and workflows fully decoupled</div>
+    </div>
+
+    <div class="claude-md-grid">
+      <div class="claude-md-card do">
+        <div class="claude-md-label">✓ Include in CLAUDE.md</div>
+        <ul>
+          <li>How to build / test / run the project</li>
+          <li>Key directory structure and module boundaries</li>
+          <li>Code style and naming constraints</li>
+          <li>Environment variable blocks</li>
+          <li>Absolute prohibitions (NEVER list)</li>
+          <li>Compact Instructions — what must survive compression</li>
+        </ul>
+      </div>
+      <div class="claude-md-card dont">
+        <div class="claude-md-label">✗ Don't Include</div>
+        <ul>
+          <li>Long background introductions</li>
+          <li>Complete API documentation</li>
+          <li>Vague "be careful" principles</li>
+          <li>Information Claude can infer from the codebase</li>
+          <li>Background material for tasks that happen once a month</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p><strong>Self-maintaining tip:</strong> When Claude makes a mistake that should never repeat, tell it: <em>"Update your CLAUDE.md so you don't make that mistake again."</em> Letting Claude maintain its own instruction file works remarkably well in practice.</p>
+    </div>
+  </section>
+
+  <!-- 12. KAKU -->
+  <section id="experience" class="section">
+    <span class="section-number">Section 12</span>
+    <h2 class="section-title">Recent Experience: Building Kaku</h2>
+
+    <div class="kaku-block">
+      <div class="kaku-title">Kaku — Open Source Terminal (Rust + Lua + AI)</div>
+      <p>Over the Spring Festival holiday, I built Kaku: an open-source terminal project using Claude Code. The underlying stack is Rust + Lua with embedded AI capabilities. Several lessons surfaced that apply well beyond this specific project:</p>
+      <p><strong>Environment transparency matters more than you think.</strong> Claude Code calls real shell, real git, real package managers, and your actual local config. This is the source of both its power and its footguns.</p>
+      <p><strong>Architecture and workflow should be fully decoupled.</strong> Global constraints in <code>CLAUDE.md</code>, path constraints in <code>rules/</code>, workflows in <code>skills/</code> — when these are separate files with single responsibilities, the system is much easier to reason about and update independently.</p>
+    </div>
+  </section>
+
+  <!-- 13. THREE STAGES -->
+  <section id="three-stages" class="section">
+    <span class="section-number">Section 13</span>
+    <h2 class="section-title">Three Stages of Claude Code Usage</h2>
+
+    <div class="article-image">
+      <img src="images/three-stages.png" alt="Three stages: Tool User (focus: how do I use this feature?), Workflow Optimizer (writing CLAUDE.md and Skills), Systems Designer (making agents work autonomously under constraints)" width="1440" height="810">
+      <div class="image-caption">The progression from tool user to systems designer — each stage represents a qualitative shift in how you use Claude Code</div>
+    </div>
+
+    <div class="callout">
+      <p><strong>The Stage 1 → 2 shift</strong> is about moving from ad-hoc prompting to structured collaboration. <strong>The Stage 2 → 3 shift</strong> is a genuine phase transition — you stop optimizing individual interactions and start designing the constraints, workflows, and verification loops that allow autonomous operation.</p>
+    </div>
+
+    <h3 class="section-subtitle">The Definability Test</h3>
+    <div class="closing-quote">
+      "If you can't clearly describe what 'done' looks like for a task, it's probably not appropriate to hand that task to Claude for autonomous completion."
+    </div>
+
+    <p>These are six months of hard-won lessons — there's certainly more ground I haven't covered yet. If you've found techniques that work well and aren't here, I'd genuinely like to hear them.</p>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="site-footer">
+    <div class="footer-note">
+      Originally published by @HiTw93 · March 12, 2026 · <a href="https://x.com/HiTw93/status/2032091246588518683" target="_blank" rel="noopener noreferrer" style="color: var(--color-primary);">View on X →</a>
+    </div>
+    <div class="footer-credit">
+      <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">Created with Perplexity Computer</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const t = document.querySelector('[data-theme-toggle]');
+  const r = document.documentElement;
+  let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+  r.setAttribute('data-theme', d);
+  const sunIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+  const moonIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  if (t) {
+    t.innerHTML = d === 'dark' ? sunIcon : moonIcon;
+    t.addEventListener('click', () => {
+      d = d === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', d);
+      t.innerHTML = d === 'dark' ? sunIcon : moonIcon;
+      t.setAttribute('aria-label', 'Switch to ' + (d === 'dark' ? 'light' : 'dark') + ' mode');
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
